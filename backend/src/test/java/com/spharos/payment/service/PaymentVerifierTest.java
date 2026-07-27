@@ -23,6 +23,7 @@ class PaymentVerifierTest {
                 "secret",
                 "store-id",
                 "channel-key",
+                "billing-channel-key",
                 "https://api.portone.io",
                 "TEST"
         );
