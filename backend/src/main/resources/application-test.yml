@@ -1,0 +1,9 @@
+spring:
+  config:
+    activate:
+      on-profile: test
+  dotenv:
+    enabled: false
+
+portone:
+  allowed-channel-type: TEST

@@ -1,0 +1,22 @@
+.DS_Store
+.idea/
+*.iml
+.vscode/
+*.log
+
+# Secrets — never commit real keys
+**/.env
+**/.env.local
+**/.env.production
+**/.env.production.local
+!**/.env.example
+
+# Dependencies & builds
+**/node_modules/
+**/.next/
+**/out/
+**/build/
+**/.gradle/
+**/coverage/
+**/.vercel/
+**/*.tsbuildinfo

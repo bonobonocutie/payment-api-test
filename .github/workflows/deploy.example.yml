@@ -1,0 +1,41 @@
+name: Deploy Example
+
+# 예시 워크플로입니다. 실제 배포 대상에 맞게 수정하세요.
+# 운영 키는 Repository/Environment Secrets에만 저장하고 코드에 넣지 마세요.
+#
+# GitHub → Settings → Secrets and variables → Actions 에 등록:
+#   PORTONE_API_SECRET
+#   PORTONE_STORE_ID
+#   PORTONE_CHANNEL_KEY
+#   CORS_ALLOWED_ORIGINS
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show that secrets are injected (값은 출력하지 않음)
+        env:
+          PORTONE_API_SECRET: ${{ secrets.PORTONE_API_SECRET }}
+          PORTONE_STORE_ID: ${{ secrets.PORTONE_STORE_ID }}
+          PORTONE_CHANNEL_KEY: ${{ secrets.PORTONE_CHANNEL_KEY }}
+        run: |
+          test -n "$PORTONE_API_SECRET"
+          test -n "$PORTONE_STORE_ID"
+          test -n "$PORTONE_CHANNEL_KEY"
+          echo "Secrets are present (values hidden)."
+
+      # 예시: 배포 단계에서 환경변수로 주입
+      # - name: Deploy to server / ECS / Kubernetes
+      #   env:
+      #     PORTONE_API_SECRET: ${{ secrets.PORTONE_API_SECRET }}
+      #     PORTONE_STORE_ID: ${{ secrets.PORTONE_STORE_ID }}
+      #     PORTONE_CHANNEL_KEY: ${{ secrets.PORTONE_CHANNEL_KEY }}
+      #     CORS_ALLOWED_ORIGINS: ${{ secrets.CORS_ALLOWED_ORIGINS }}
+      #     SPRING_PROFILES_ACTIVE: prod
+      #   run: ./scripts/deploy.sh
