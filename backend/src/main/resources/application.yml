@@ -11,6 +11,7 @@ portone:
   api-secret: ${PORTONE_API_SECRET}
   store-id: ${PORTONE_STORE_ID}
   channel-key: ${PORTONE_CHANNEL_KEY}
+  billing-channel-key: ${PORTONE_BILLING_CHANNEL_KEY}
   api-base-url: ${PORTONE_API_BASE_URL:https://api.portone.io}
   # 테스트/운영 채널을 환경별로 분리해 잘못된 환경 결제를 차단한다.
   allowed-channel-type: ${PORTONE_ALLOWED_CHANNEL_TYPE:TEST}
@@ -21,7 +22,9 @@ payment:
     amount: ${PAYMENT_TEST_AMOUNT:1000}
     currency: ${PAYMENT_TEST_CURRENCY:CURRENCY_KRW}
     pay-method: ${PAYMENT_TEST_PAY_METHOD:CARD}
+    billing-key-method: ${PAYMENT_TEST_BILLING_KEY_METHOD:CARD}
     customer:
+      id: ${PAYMENT_TEST_CUSTOMER_ID:test-customer-001}
       full-name: ${PAYMENT_TEST_CUSTOMER_NAME:테스트구매자}
       phone-number: ${PAYMENT_TEST_CUSTOMER_PHONE:01012345678}
       email: ${PAYMENT_TEST_CUSTOMER_EMAIL:test@example.com}

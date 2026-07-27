@@ -11,6 +11,8 @@ public record PortOneProperties(
         String apiSecret,
         String storeId,
         String channelKey,
+        // 빌링키(결제수단 등록)용 채널. 일반결제 채널과 분리한다.
+        String billingChannelKey,
         String apiBaseUrl,
         String allowedChannelType
 ) {

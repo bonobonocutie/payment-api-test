@@ -1,6 +1,14 @@
 import * as PortOne from "@portone/browser-sdk/v2";
-import type { Currency, PaymentPayMethod } from "@portone/browser-sdk/v2";
+import type {
+  BillingKeyMethod,
+  Currency,
+  PaymentPayMethod,
+} from "@portone/browser-sdk/v2";
 
+import type {
+  PortOneIssueBillingKeyOutcome,
+  PortOneIssueBillingKeyParams,
+} from "@/types/billing";
 import type {
   PortOnePaymentOutcome,
   PortOnePaymentRequestParams,
@@ -10,7 +18,6 @@ const USER_CANCEL_CODE = "FAILURE_TYPE_USER_CANCEL";
 const STORE_ID_PREFIX = "store-";
 
 function toCurrency(value: string): Currency {
-  // 서버에서 CURRENCY_KRW / KRW 모두 올 수 있어 SDK Currency 타입으로 정규화한다.
   return value as Currency;
 }
 
@@ -18,8 +25,11 @@ function toPayMethod(value: string): PaymentPayMethod {
   return value as PaymentPayMethod;
 }
 
+function toBillingKeyMethod(value: string): BillingKeyMethod {
+  return value as BillingKeyMethod;
+}
+
 function validateStoreId(storeId: string): void {
-  // V1 imp 코드(예: iamporttest_3)를 넣으면 결제창이 열리지 않거나 Promise가 끝나지 않을 수 있다.
   if (!storeId.startsWith(STORE_ID_PREFIX)) {
     throw new Error(
       `잘못된 Store ID 형식입니다. PortOne V2 콘솔의 store-... 값을 사용하세요. (현재값: ${storeId})`
@@ -45,13 +55,12 @@ export async function requestPortOnePayment(
       totalAmount: params.totalAmount,
       currency: toCurrency(params.currency),
       payMethod: toPayMethod(params.payMethod),
-      // 다수 PG(이니시스/스마트로 등)에서 구매자 연락처를 요구한다.
       customer: {
+        customerId: params.customer.id,
         fullName: params.customer.fullName,
         phoneNumber: params.customer.phoneNumber,
         email: params.customer.email,
       },
-      // windowType을 강제하지 않는다. 토스페이먼츠 등은 PC에서 POPUP을 지원하지 않는다.
       redirectUrl: window.location.href,
     });
 
@@ -86,6 +95,74 @@ export async function requestPortOnePayment(
       error instanceof Error
         ? error.message
         : "PortOne 결제창 호출 중 오류가 발생했습니다.";
+
+    return {
+      type: "failure",
+      message,
+    };
+  }
+}
+
+/**
+ * 결제수단(빌링키) 등록용 PortOne SDK 호출.
+ */
+export async function requestPortOneIssueBillingKey(
+  params: PortOneIssueBillingKeyParams
+): Promise<PortOneIssueBillingKeyOutcome> {
+  validateStoreId(params.storeId);
+
+  try {
+    const response = await PortOne.requestIssueBillingKey({
+      storeId: params.storeId,
+      channelKey: params.channelKey,
+      billingKeyMethod: toBillingKeyMethod(params.billingKeyMethod),
+      customer: {
+        customerId: params.customer.id,
+        fullName: params.customer.fullName,
+        phoneNumber: params.customer.phoneNumber,
+        email: params.customer.email,
+      },
+      redirectUrl: window.location.href,
+    });
+
+    if (!response) {
+      return {
+        type: "cancelled",
+        message: "결제수단 등록 창이 닫혔거나 응답이 없습니다.",
+      };
+    }
+
+    if (response.code != null) {
+      if (response.code === USER_CANCEL_CODE) {
+        return {
+          type: "cancelled",
+          message: response.message ?? "사용자가 결제수단 등록을 취소했습니다.",
+        };
+      }
+
+      return {
+        type: "failure",
+        code: response.code,
+        message: response.message ?? "결제수단 등록에 실패했습니다.",
+      };
+    }
+
+    if (!response.billingKey) {
+      return {
+        type: "failure",
+        message: "빌링키가 발급되지 않았습니다.",
+      };
+    }
+
+    return {
+      type: "success",
+      billingKey: response.billingKey,
+    };
+  } catch (error) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : "결제수단 등록 창 호출 중 오류가 발생했습니다.";
 
     return {
       type: "failure",

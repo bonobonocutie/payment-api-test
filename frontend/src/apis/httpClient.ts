@@ -1,7 +1,7 @@
 import { API_BASE_URL } from "@/utils/constants";
 import { ApiError, type ApiResponse } from "@/types/api";
 
-type HttpMethod = "GET" | "POST";
+type HttpMethod = "GET" | "POST" | "PUT";
 
 interface RequestOptions {
   method?: HttpMethod;
@@ -51,5 +51,8 @@ export const httpClient = {
   },
   post<T>(path: string, body: unknown, signal?: AbortSignal): Promise<T> {
     return request<T>(path, { method: "POST", body, signal });
+  },
+  put<T>(path: string, body: unknown, signal?: AbortSignal): Promise<T> {
+    return request<T>(path, { method: "PUT", body, signal });
   },
 };

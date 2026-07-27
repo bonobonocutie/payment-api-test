@@ -1,5 +1,7 @@
 package com.spharos.payment.client;
 
+import com.spharos.payment.client.dto.PortOneBillingKeyApiResponse;
+import com.spharos.payment.client.dto.PortOneBillingKeyPaymentRequest;
 import com.spharos.payment.client.dto.PortOnePaymentApiResponse;
 
 /**
@@ -9,4 +11,12 @@ import com.spharos.payment.client.dto.PortOnePaymentApiResponse;
 public interface PortOnePaymentClient {
 
     PortOnePaymentApiResponse getPayment(String paymentId);
+
+    PortOneBillingKeyApiResponse getBillingKey(String billingKey);
+
+    /**
+     * 빌링키로 결제를 요청한다.
+     * 성공 시 결제 단건 조회로 최종 상태를 확인한다.
+     */
+    void payWithBillingKey(String paymentId, PortOneBillingKeyPaymentRequest request);
 }

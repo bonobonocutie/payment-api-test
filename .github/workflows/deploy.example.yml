@@ -7,6 +7,7 @@ name: Deploy Example
 #   PORTONE_API_SECRET
 #   PORTONE_STORE_ID
 #   PORTONE_CHANNEL_KEY
+#   PORTONE_BILLING_CHANNEL_KEY
 #   CORS_ALLOWED_ORIGINS
 
 on:
@@ -24,10 +25,12 @@ jobs:
           PORTONE_API_SECRET: ${{ secrets.PORTONE_API_SECRET }}
           PORTONE_STORE_ID: ${{ secrets.PORTONE_STORE_ID }}
           PORTONE_CHANNEL_KEY: ${{ secrets.PORTONE_CHANNEL_KEY }}
+          PORTONE_BILLING_CHANNEL_KEY: ${{ secrets.PORTONE_BILLING_CHANNEL_KEY }}
         run: |
           test -n "$PORTONE_API_SECRET"
           test -n "$PORTONE_STORE_ID"
           test -n "$PORTONE_CHANNEL_KEY"
+          test -n "$PORTONE_BILLING_CHANNEL_KEY"
           echo "Secrets are present (values hidden)."
 
       # 예시: 배포 단계에서 환경변수로 주입
@@ -36,6 +39,7 @@ jobs:
       #     PORTONE_API_SECRET: ${{ secrets.PORTONE_API_SECRET }}
       #     PORTONE_STORE_ID: ${{ secrets.PORTONE_STORE_ID }}
       #     PORTONE_CHANNEL_KEY: ${{ secrets.PORTONE_CHANNEL_KEY }}
+      #     PORTONE_BILLING_CHANNEL_KEY: ${{ secrets.PORTONE_BILLING_CHANNEL_KEY }}
       #     CORS_ALLOWED_ORIGINS: ${{ secrets.CORS_ALLOWED_ORIGINS }}
       #     SPRING_PROFILES_ACTIVE: prod
       #   run: ./scripts/deploy.sh

@@ -36,7 +36,8 @@ PaymentApiTest/
 1. [PortOne 관리자 콘솔](https://admin.portone.io/) **V2 연동 정보**에서 테스트 채널을 생성합니다.
 2. 아래 값을 확인합니다.
    - Store ID (`store-...` 형식, V1의 `iamporttest_3` 같은 코드는 사용 불가)
-   - Channel Key (`channel-key-...`)
+   - Channel Key (`channel-key-...`) — 일반 결제용
+   - Billing Channel Key (`channel-key-...`) — **정기결제/빌링키용** (토스는 정기결제 MID 채널)
    - V2 API Secret
 
 ## 시크릿 관리 (중요)
@@ -67,6 +68,7 @@ cp .env.example .env
 export PORTONE_API_SECRET=...
 export PORTONE_STORE_ID=...
 export PORTONE_CHANNEL_KEY=...
+export PORTONE_BILLING_CHANNEL_KEY=...
 docker compose up --build
 ```
 
@@ -79,6 +81,7 @@ Repository Settings → Secrets and variables → Actions 에 등록:
 - `PORTONE_API_SECRET`
 - `PORTONE_STORE_ID`
 - `PORTONE_CHANNEL_KEY`
+- `PORTONE_BILLING_CHANNEL_KEY`
 - `CORS_ALLOWED_ORIGINS`
 
 배포 예시는 `.github/workflows/deploy.example.yml` 참고.
@@ -127,25 +130,23 @@ npm run dev
 
 ## API
 
-### `GET /payment/ready`
+### 일회성 결제
 
-테스트 결제에 필요한 정보를 반환합니다.
+- `GET /payment/ready` — 테스트 결제에 필요한 정보 반환
+- `POST /payment/verify` — PortOne 결제 검증 (`paymentId`)
 
-### `POST /payment/verify`
+### 빌링키(등록 결제수단)
 
-```json
-{
-  "paymentId": "payment-xxxx"
-}
-```
-
-PortOne 결제 단건 조회 후 아래를 검증합니다.
-
-- 결제 상태 `PAID`
-- 금액/주문명/통화 일치
-- 환경별 허용 채널(`TEST` 또는 `LIVE`)
+- `GET /billing-keys/ready` — 빌링키 발급용 storeId/channelKey/customer
+- `POST /billing-keys` — 발급된 billingKey 검증 후 등록 (첫 카드는 기본 결제수단)
+- `GET /billing-keys` — 등록된 결제수단 목록 (기본 여부 포함)
+- `POST /billing-keys/default` — 기본 결제수단 변경
+- `GET /billing-keys/default` — 기본 결제수단 조회
+- `POST /payment/billing` — 선택한 billingKey로 서버 결제 + 검증
 
 ## 결제 흐름
+
+### 일회성 테스트 결제
 
 1. 페이지 진입 시 `GET /payment/ready`
 2. **테스트 결제** 버튼 클릭
@@ -153,7 +154,16 @@ PortOne 결제 단건 조회 후 아래를 검증합니다.
 4. 결제 완료 후 `POST /payment/verify`
 5. 성공/실패 결과 표시
 
+### 등록 결제수단으로 결제
+
+1. **결제수단 등록** → PortOne 빌링키 발급 창 (여러 장 등록 가능)
+2. `POST /billing-keys`로 서버에 등록 → 목록 표시 (첫 카드는 자동 기본)
+3. **기본으로 설정**으로 기본 결제수단 변경
+4. **기본 수단으로 결제** → `POST /payment/billing` (결제창 없음)
+
+> 빌링키 목록/기본수단은 인메모리 저장이라 서버 재시작 시 초기됩니다.
+
 ## 의도적으로 제외한 기능
 
-주문 생성, DB 저장, 환불, 쿠폰, 포인트는 구현하지 않았습니다.  
-다만 `PaymentSessionRepository` / `PortOnePaymentClient` 추상화로 실제 결제 도메인으로 확장할 수 있게 구성했습니다.
+주문 생성, DB 저장, 환불, 쿠폰, 포인트, 빌링키 삭제 UI는 구현하지 않았습니다.  
+다만 `PaymentSessionRepository` / `BillingKeyRepository` / `PortOnePaymentClient` 추상화로 실제 결제 도메인으로 확장할 수 있게 구성했습니다.

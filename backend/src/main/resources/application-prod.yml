@@ -11,6 +11,7 @@ portone:
   api-secret: ${PORTONE_API_SECRET}
   store-id: ${PORTONE_STORE_ID}
   channel-key: ${PORTONE_CHANNEL_KEY}
+  billing-channel-key: ${PORTONE_BILLING_CHANNEL_KEY}
   allowed-channel-type: LIVE
 
 cors:

@@ -12,9 +12,11 @@ public record PaymentTestProperties(
         Long amount,
         String currency,
         String payMethod,
+        String billingKeyMethod,
         Customer customer
 ) {
     public record Customer(
+            String id,
             String fullName,
             String phoneNumber,
             String email

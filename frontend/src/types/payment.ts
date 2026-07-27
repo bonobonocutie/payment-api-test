@@ -1,6 +1,7 @@
 import type { PaymentResultStatus } from "@/utils/constants";
 
 export interface PaymentCustomerInfo {
+  id?: string;
   fullName: string;
   phoneNumber: string;
   email: string;

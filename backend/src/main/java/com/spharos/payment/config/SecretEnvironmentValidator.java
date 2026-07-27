@@ -30,7 +30,8 @@ public class SecretEnvironmentValidator implements ApplicationRunner {
     public void run(ApplicationArguments args) {
         validateApiSecret(portOneProperties.apiSecret());
         validateStoreId(portOneProperties.storeId());
-        validateChannelKey(portOneProperties.channelKey());
+        validateChannelKey("PORTONE_CHANNEL_KEY", portOneProperties.channelKey());
+        validateChannelKey("PORTONE_BILLING_CHANNEL_KEY", portOneProperties.billingChannelKey());
 
         if (isProdProfile()) {
             log.info("Production profile active. Secrets must come from external environment injection.");
@@ -58,10 +59,10 @@ public class SecretEnvironmentValidator implements ApplicationRunner {
         }
     }
 
-    private void validateChannelKey(String channelKey) {
+    private void validateChannelKey(String envName, String channelKey) {
         if (isBlank(channelKey) || !channelKey.startsWith("channel-key-") || channelKey.contains("xxxxxxxx")) {
             throw new IllegalStateException(
-                    "PORTONE_CHANNEL_KEY가 올바르지 않습니다. 환경변수로 실제 channel-key 값을 주입하세요."
+                    envName + "가 올바르지 않습니다. 환경변수로 실제 channel-key 값을 주입하세요."
             );
         }
     }

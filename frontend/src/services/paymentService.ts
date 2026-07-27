@@ -1,4 +1,5 @@
 import { paymentApi } from "@/apis/paymentApi";
+import type { BillingPaymentRequest } from "@/types/billing";
 import type {
   PaymentReadyInfo,
   PaymentVerifyRequest,
@@ -19,5 +20,12 @@ export const paymentService = {
     signal?: AbortSignal
   ): Promise<PaymentVerifyResult> {
     return paymentApi.verify(request, signal);
+  },
+
+  payWithRegisteredMethod(
+    request: BillingPaymentRequest,
+    signal?: AbortSignal
+  ): Promise<PaymentVerifyResult> {
+    return paymentApi.payWithBillingKey(request, signal);
   },
 };

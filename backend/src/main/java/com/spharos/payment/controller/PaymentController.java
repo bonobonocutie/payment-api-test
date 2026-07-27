@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.spharos.payment.dto.request.BillingPaymentRequest;
 import com.spharos.payment.dto.request.PaymentVerifyRequest;
 import com.spharos.payment.dto.response.ApiResponse;
 import com.spharos.payment.dto.response.PaymentReadyResponse;
@@ -36,5 +37,12 @@ public class PaymentController {
     @PostMapping("/verify")
     public ApiResponse<PaymentVerifyResponse> verify(@Valid @RequestBody PaymentVerifyRequest request) {
         return ApiResponse.success(paymentService.verify(request));
+    }
+
+    @PostMapping("/billing")
+    public ApiResponse<PaymentVerifyResponse> payWithBillingKey(
+            @Valid @RequestBody BillingPaymentRequest request
+    ) {
+        return ApiResponse.success(paymentService.payWithBillingKey(request));
     }
 }

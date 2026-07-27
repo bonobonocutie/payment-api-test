@@ -78,36 +78,38 @@ Controller / Service / Repository / DTO / Entity / Config / Exception / Client
 
 1. `GET /payment/ready` — 테스트 결제에 필요한 정보 반환
 2. `POST /payment/verify` — PortOne 결제 검증
-3. Frontend
-   - "테스트 결제" 버튼
-   - 클릭 → PortOne 테스트 결제창
-   - 완료 → backend verify
+3. 빌링키(등록 결제수단)
+   - `GET /billing-keys/ready`
+   - `POST /billing-keys` / `GET /billing-keys`
+   - `POST /payment/billing` (선택 수단으로 서버 결제, 결제창 없음)
+4. Frontend
+   - "테스트 결제" 버튼 (일회성)
+   - "결제수단 등록" → 목록에서 선택 → "등록 수단으로 결제"
    - 성공/실패 출력
 
 ### UI
 간단한 테스트 페이지 `PaymentTestPage`
-- 상품명
-- 금액
-- 테스트 결제 버튼
-- 결제 결과
+- 상품명 / 금액 / 테스트 결제 버튼 / 결제 결과
+- 결제수단 등록 / 등록 목록 선택 / 등록 수단 결제
 
 디자인: shadcn/ui
 
 ## 범위 (하지 말 것)
 
-- 주문 생성, DB 저장, 환불, 쿠폰, 포인트 구현 금지
+- 주문 생성, DB 저장, 환불, 쿠폰, 포인트, 빌링키 삭제 UI 구현 금지
 - 하지만 나중에 붙일 수 있게 확장 가능한 구조로 작성
 
 ## PortOne V2 주의사항 (중요)
 
 - Store ID는 `store-...` 형식 (V1의 `iamporttest_3` 같은 PG MID 사용 금지)
-- Channel Key는 `channel-key-...`
+- Channel Key는 `channel-key-...` (일반결제 / 빌링키용 채널 분리: `PORTONE_BILLING_CHANNEL_KEY`)
 - API Secret은 PortOne 콘솔의 **V2 API Secret** 사용
   - 토스 `test_sk_...` 같은 PG Secret Key 사용 금지
 - `windowType`을 `POPUP`으로 강제하지 말 것 (토스페이먼츠 PC에서 실패함)
 - 다수 PG는 `customer.phoneNumber` 등 구매자 정보 필요
 - 테스트 채널은 `TEST`, 운영은 `LIVE`만 허용
 - verify는 PortOne 단건 조회로 상태(`PAID`)/금액/주문명/통화/채널 검증
+- 빌링키 발급은 `requestIssueBillingKey`, 결제는 서버 `POST /payments/{id}/billing-key`
 
 ## 시크릿 관리
 
@@ -124,11 +126,15 @@ CI    → 더미 env
 
 ## 결제 흐름
 
+### 일회성
 1. 페이지 진입 → `GET /payment/ready`
-2. 테스트 결제 클릭
-3. PortOne 결제창 호출
-4. 완료 후 `POST /payment/verify`
-5. 성공/실패 UI 표시
+2. 테스트 결제 클릭 → PortOne 결제창
+3. 완료 후 `POST /payment/verify`
+
+### 등록 결제수단
+1. 결제수단 등록 → `requestIssueBillingKey`
+2. `POST /billing-keys`로 서버 등록 → 목록 표시
+3. 선택 후 `POST /payment/billing` (결제창 없음)
 
 예외가 나도 UI가 LOADING에 고착되지 않게 try/catch 처리할 것.
 
